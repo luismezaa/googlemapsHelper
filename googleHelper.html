@@ -1,0 +1,154 @@
+<html>
+<head>
+   <meta charset="utf-8">
+  <script src="https://use.fontawesome.com/1a178a2dc9.js"></script>
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js"
+            integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+            crossorigin="anonymous"></script>
+ <script src="https://maps.googleapis.com/maps/api/js?libraries=places,drawing&key=AIzaSyDeihOWqkW9byq45Ezh5ClrZNnVFFDFMAY"></script>
+ <script type = "text/javascript" src="jsts.min.js"></script>
+ <script type = "text/javascript" src="measure-tool.min.js"></script>
+ <script type = "text/javascript" src="googleHelper.js"></script>
+ 
+ 
+ 
+ <style>
+   .iconSize-45 {
+      font-size: 45px !important;
+   }
+   .iconSize-25 {
+      font-size: 25px !important;
+   }
+   .red {
+      color:red;
+   }
+ </style>
+  
+ <script type = "text/javascript">
+ 
+    
+ $(document).ready(function(){
+ 
+    var map = new googleMapsHelper({drawControl : true}); 
+ 
+  //  map.initDrawControl(); 
+	
+	var icon = "arrow-navigation.svg";
+	
+//	map.addRotateMarker({lat:-33.4378439, lon: -70.6504796, course : 270}, function(){ alert("click");},  icon,{bindClick: true, content: "<div>HOLA POPUP</div>"}, 1, { size : [32,32], scaledSize : [21,25], anchor : [0,12.5]}) ;
+	
+	var pointa = -32.858996430;
+	var pointb = -70.435860157;
+	for(var ii = 0; ii <= 20; ii++){
+	
+	                var zoomMarker = map.addMarker([pointa,pointb], null,
+                        {
+                            id: 2,
+                            icon: map.MARKERS.POI,
+                           popup : {bindClick: true, content: "<div>HOLA POPUP</div>"}
+                        });
+						
+						pointa+= 0.01;
+						pointb+= 0.01;
+	}
+	
+    
+
+
+
+
+	
+var line =	map.drawLine([[-33.4378439, -70.6504796],[-33.4368440, -70.6704796],{ lat: -33.4233405, lon: -70.5896295}], null, true, {ant: { antPath: true }});
+	var circulo  = map.drawCircle([-33.4378439, -70.6504796], 300, function(){alert("CIURCL")},{editable: false});
+
+	
+	
+	var triangleCoords = [
+    {lat: 25.774, lng: -80.190},
+    {lat: 18.466, lng: -66.118},
+    {lat: 32.321, lng: -64.757},
+    {lat: 25.774, lng: -80.190}
+  ];
+  
+  
+  
+//var trian =   map.drawPolygon(triangleCoords, function(){alert("CIURCL")},{editable: false});
+map.setLabel(false,line, "ESTO ES UNA ETIQUETA"); 	  
+  
+  
+	//map.addMarker([-25.363, 131.044], function(){ alert("click");}, null, icon, "#99ffcc",  null, null, null,{bindClick: true, content: "<div>HOLA POPUP</div>"}, 2) ;
+
+
+	
+	 map.route([
+	 {origin: { lat: -33.4626751, lon: -70.66412 }, destination: {lat:-33.5114413, lon:  -70.5822389}},
+	 {origin: { lat: -33.4233405, lon: -70.5896295}, destination: {lat:-33.3844504, lon:  -70.6960529}}],
+	 function(ret){
+	    
+		console.info(ret);
+		map.zoomToExtent();
+		
+		
+	 
+	 }, true, "panel");
+	 
+	
+	
+	$("#hl,#h2").on("click", function(){
+
+	   if(this.id == "hl"){
+	   map.highlight(1,{zoom: 20});
+	   }
+	   if(this.id == "h2"){
+	   map.highlight(2,{zoom: 20});
+	   }
+	   
+	
+	});
+	
+	$("#fit").on("click", function(){
+
+	   
+	   map.zoomToExtent();
+	   
+	
+	});
+		
+		
+		window.setTimeout(function(){
+		
+		//map.zoomMarker(zoomMarker);
+		
+		
+		console.info(map.layers.directions[0].directions.routes[map.layers.directions[0].routeIndex].overview_path);
+		
+		map.routeBox(map.layers.directions[0].directions.routes[map.layers.directions[0].routeIndex].overview_path,  10, true)
+		
+		// map.clear(); 
+		//map.deleteShape(trian); 
+		},2000);
+		
+		
+	
+		
+	
+ });
+ 
+ 
+ </script>
+ 
+</head>
+
+ <body>
+ 
+   
+ <button id="hl">highlight 1</button>
+ <button id="h2">highlight 2</button>
+ <button id="fit">FIT</button>
+	<div id="map" style='height:100%'></div>
+    <div id="panel" style='height:100%'></div> 
+ </body>
+
+ 
+ 
+</html>
