@@ -1079,7 +1079,7 @@ googleMapsHelper.prototype.enableDraw = function () {
     }
 }
 googleMapsHelper.prototype.MARKERS = {};
-googleMapsHelper.prototype.MARKERS.BASESITE = "./bower_components/googlemaps"
+googleMapsHelper.prototype.MARKERS.BASESITE = "."
 googleMapsHelper.prototype.MARKERS.POI_AZUL = googleMapsHelper.prototype.MARKERS.BASESITE + "/pointOfInterest-azul.svg";
 googleMapsHelper.prototype.MARKERS.POI_VERDE = googleMapsHelper.prototype.MARKERS.BASESITE + "/pointOfInterest-verde.svg";
 googleMapsHelper.prototype.MARKERS.POI_ROJO = googleMapsHelper.prototype.MARKERS.BASESITE + "/pointOfInterest-rojo.svg";
