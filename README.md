@@ -8,7 +8,7 @@ Biblioteca de ayuda para google maps
 * jsts: https://github.com/bjornharrtell/jsts para el buffer de rutas
 * measure tool : https://github.com/zhenyanghua/MeasureTool-GoogleMaps-V3 para el control de medición de distancias.
 
-DOCUMENTACIÓN EN CURSO:
-****************************
+# DOCUMENTACIÓN EN CURSO:
+
 
 
