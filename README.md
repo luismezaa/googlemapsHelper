@@ -34,8 +34,8 @@ Biblioteca de ayuda para google maps
      map.addMarker([-32.858996430,70.435860157], null,
                         {
                             id: 2,
-                            icon: map.MARKERS.POI,
-                           popup : {bindClick: true, content: "<div>HOLA POPUP</div>"}
+                            icon: map.MARKERS.POI_VERDE,
+                           popup : {bindClick: true, content: "<div>DEMO POPUP</div>"}
                         });
  }
  </script>
