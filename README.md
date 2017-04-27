@@ -12,7 +12,7 @@ Biblioteca de ayuda para google maps
 
 # Modo de uso
 
-...
+```
 <html>
 <head>
  <meta charset="utf-8">
@@ -48,7 +48,7 @@ Biblioteca de ayuda para google maps
  </body>
 
 </html>
-...
+```
 
 # Contribuir
 * Cualquiera es bienvenido
