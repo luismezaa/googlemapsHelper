@@ -26,7 +26,7 @@ Biblioteca de ayuda para google maps
  <script type = "text/javascript" src="googleHelper.js"></script>
  <script type = "text/javascript">
  
- ```javascript   
+ 
  $(document).ready(function(){
     
      var map = new googleMapsHelper({drawControl : true}); 
@@ -38,7 +38,7 @@ Biblioteca de ayuda para google maps
                            popup : {bindClick: true, content: "<div>DEMO POPUP</div>"}
                         });
  }
- ```
+ 
  </script>
  
  <body>
