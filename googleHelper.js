@@ -529,14 +529,12 @@ googleMapsHelper.prototype.addMarker = function (point, click, options) {
 
     defaultOptions = $.extend({}, defaultOptions, options || {});
 
-    if (defaultOptions.icon.icon) {
+    if (defaultOptions.icon && defaultOptions.icon.icon) {
         defaultOptions.size = defaultOptions.icon.size;
         defaultOptions.scaledSize = defaultOptions.icon.scaledSize;
         defaultOptions.anchor = defaultOptions.icon.anchor;
         defaultOptions.icon = defaultOptions.icon.icon;
     }
-
-
 
 
     var _this = this;
@@ -624,7 +622,7 @@ googleMapsHelper.prototype.addRotateMarker = function (point, click, options) {
 
     defaultOptions = $.extend({}, defaultOptions, options || {});
 
-    if (defaultOptions.icon.icon) {
+    if (defaultOptions.icon && defaultOptions.icon.icon) {
         defaultOptions.size = defaultOptions.icon.size;
         defaultOptions.scaledSize = defaultOptions.icon.scaledSize;
         defaultOptions.anchor = defaultOptions.icon.anchor;
@@ -1153,7 +1151,7 @@ googleMapsHelper.prototype._rotateMarker = function (marker) {
     }, 3000);
 }
 googleMapsHelper.prototype.MARKERS = {};
-googleMapsHelper.prototype.MARKERS.BASESITE = "."
+googleMapsHelper.prototype.MARKERS.BASESITE = "./bower_components/googlemaps"
 googleMapsHelper.prototype.MARKERS.POI_AZUL = googleMapsHelper.prototype.MARKERS.BASESITE + "/pointOfInterest-azul.svg";
 googleMapsHelper.prototype.MARKERS.POI_VERDE = googleMapsHelper.prototype.MARKERS.BASESITE + "/pointOfInterest-verde.svg";
 googleMapsHelper.prototype.MARKERS.POI_ROJO = googleMapsHelper.prototype.MARKERS.BASESITE + "/pointOfInterest-rojo.svg";
