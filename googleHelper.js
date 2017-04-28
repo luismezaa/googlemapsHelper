@@ -66,7 +66,7 @@ function ajustarMapa(ajustarMapaControlDiv, helper) {
     // Setup the click event listeners: simply set the map to Chicago.
     controlUI.addEventListener('click', function () {
 
-        helper.zoomToExtent(); 
+        helper.zoomToExtent();
 
     });
 
@@ -203,18 +203,21 @@ function googleMapsHelper(options) {
         draw: [],
         objectsIds: [],
         infoWindows: [],
-        routeBoxes: []
+        routeBoxes: [],
+        cluster: []
     };
 
     _this.directionsService = new google.maps.DirectionsService();
     _this.measureTool = null;
 
     function initMap(_this) {
-        console.info(_this.settings.initialMapLayer.toLowerCase()); 
+
         _this.mapInstance = new google.maps.Map(document.getElementById(_this.settings.target), {
             center: { lat: _this.settings.center[0], lng: _this.settings.center[1] },
             zoom: _this.settings.defaultZoom,
             scaleControl: true,
+            fullscreenControl: true,
+            rotateControl: true,
             mapTypeId: _this.settings.initialMapLayer.toLowerCase()
         });
 
@@ -238,8 +241,6 @@ function googleMapsHelper(options) {
         labelControlDiv.index = 3;
         _this.mapInstance.controls[google.maps.ControlPosition.LEFT_CENTER].push(labelControlDiv);
         _this.labelControl = labelControlDiv;
-
-
 
     }
     function getGoogleLocation(location) {
@@ -320,6 +321,9 @@ function googleMapsHelper(options) {
 googleMapsHelper.prototype.remove = function (removeMap) {
     var _this = this;
 
+    for (var ii = 0; ii <= _this.layers.cluster.length - 1; ii++) {
+        _this.layers.cluster[ii].clearMarkers();
+    }
 
     for (var ii = 0; ii <= _this.layers.totalMarkers.length - 1; ii++) {
         _this.layers.totalMarkers[ii].setMap(null);
@@ -344,6 +348,19 @@ googleMapsHelper.prototype.remove = function (removeMap) {
     for (var ii = 0; ii <= _this.layers.objectsIds.length - 1; ii++) {
         $(document.getElementById(_this.layers.objectsIds[ii])).remove();
     }
+
+    _this.layers = {
+        totalMarkers: [],
+        markers: [],
+        activeHighlightMarkers: [],
+        directions: [],
+        draw: [],
+        objectsIds: [],
+        infoWindows: [],
+        routeBoxes: [],
+        cluster: []
+    };
+
 
     if (removeMap != undefined && removeMap === true) {
         $(document.getElementById(_this.settings.target)).remove();
@@ -499,6 +516,7 @@ googleMapsHelper.prototype.addMarker = function (point, click, options) {
     var defaultOptions = {
         extraData: null,
         icon: null,
+        isClustered: false,
         popup: {
 
             bindClick: false,
@@ -510,6 +528,15 @@ googleMapsHelper.prototype.addMarker = function (point, click, options) {
     }
 
     defaultOptions = $.extend({}, defaultOptions, options || {});
+
+    if (defaultOptions.icon.icon) {
+        defaultOptions.size = defaultOptions.icon.size;
+        defaultOptions.scaledSize = defaultOptions.icon.scaledSize;
+        defaultOptions.anchor = defaultOptions.icon.anchor;
+        defaultOptions.icon = defaultOptions.icon.icon;
+    }
+
+
 
 
     var _this = this;
@@ -526,7 +553,7 @@ googleMapsHelper.prototype.addMarker = function (point, click, options) {
 
 
     marker.extraData = defaultOptions.extraData;
-
+    marker.isClustered = defaultOptions.isClustered;
     if (click) {
         marker.addListener('click', click);
     }
@@ -575,35 +602,53 @@ googleMapsHelper.prototype.addMarker = function (point, click, options) {
     return marker;
 
 }
-googleMapsHelper.prototype.addRotateMarker = function (point, click, icon, popup, id, options) {
+googleMapsHelper.prototype.addRotateMarker = function (point, click, options) {
     var _this = this;
     var guid = _this.guid();
     var course = point.course;
 
-    options = options || { size: [32, 32], scaledSize: [16, 16], anchor: [0, 8] };
+    var defaultOptions = {
+        icon: null,
+        size: [32, 32],
+        scaledSize: [16, 16],
+        anchor: [0, 8],
+        isClustered: false,
+        popup: {
 
-    icon = icon + "#" + guid;
+            bindClick: false,
+            content: null
+
+        },
+        id: null,
+    }
+
+    defaultOptions = $.extend({}, defaultOptions, options || {});
+
+    if (defaultOptions.icon.icon) {
+        defaultOptions.size = defaultOptions.icon.size;
+        defaultOptions.scaledSize = defaultOptions.icon.scaledSize;
+        defaultOptions.anchor = defaultOptions.icon.anchor;
+        defaultOptions.icon = defaultOptions.icon.icon + "#" + guid;
+    } else {
+        defaultOptions.icon = defaultOptions.icon + "#" + guid;
+    }
+
 
     var iconMarker = {
-        url: icon,
-        size: new google.maps.Size(options.size[0], options.size[1]),
-        scaledSize: new google.maps.Size(options.scaledSize[0], options.scaledSize[1]),
-        anchor: new google.maps.Point(options.anchor[0], options.anchor[1])
+        url: defaultOptions.icon,
+        size: new google.maps.Size(defaultOptions.size[0], defaultOptions.size[1]),
+        scaledSize: new google.maps.Size(defaultOptions.scaledSize[0], defaultOptions.scaledSize[1]),
+        anchor: new google.maps.Point(defaultOptions.anchor[0], defaultOptions.anchor[1])
     };
 
-    var marker = _this.addMarker(point, click, null, iconMarker, null, null, null, null, popup, id);
+    defaultOptions.icon = iconMarker;
 
-    var interval = window.setInterval(function () {
-        var image = $('img[src*="' + icon + '"]');
+    var marker = _this.addMarker(point, click, defaultOptions);
 
+    marker.rotation = course;
+    marker.isClustered = defaultOptions.isClustered;
 
-        if (image.length && image.length > 0) {
-            window.clearInterval(interval);
-            image.css({ 'transform': 'rotate(' + course + 'deg)' });
-        }
-
-    }, 100);
-
+    _this._rotateMarker(marker); 
 
 
     return marker;
@@ -1078,8 +1123,49 @@ googleMapsHelper.prototype.enableDraw = function () {
 
     }
 }
+googleMapsHelper.prototype.cluster = function (markers) {
+    var _this = this;
+    var markerCluster = new MarkerClusterer(_this.mapInstance, markers,
+        {
+            imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m', onMarkerShowed: function (marker) {
+                _this._rotateMarker(marker);
+            }
+        });
+
+    _this.layers.cluster.push(markerCluster);
+
+}
+googleMapsHelper.prototype._rotateMarker = function (marker) {
+    var interval = window.setInterval(function () {
+
+        var image = $('img[src*="' + (marker.icon.url ? marker.icon.url : marker.icon) + '"]');
+
+        if (image.length && image.length > 0) {
+            window.clearInterval(interval);
+            image.css({ 'transform': 'rotate(' + marker.rotation + 'deg)' });
+        }
+
+    }, 100);
+    window.setTimeout(function () {
+
+        window.clearInterval(interval);
+
+    }, 3000);
+}
 googleMapsHelper.prototype.MARKERS = {};
 googleMapsHelper.prototype.MARKERS.BASESITE = "."
 googleMapsHelper.prototype.MARKERS.POI_AZUL = googleMapsHelper.prototype.MARKERS.BASESITE + "/pointOfInterest-azul.svg";
 googleMapsHelper.prototype.MARKERS.POI_VERDE = googleMapsHelper.prototype.MARKERS.BASESITE + "/pointOfInterest-verde.svg";
 googleMapsHelper.prototype.MARKERS.POI_ROJO = googleMapsHelper.prototype.MARKERS.BASESITE + "/pointOfInterest-rojo.svg";
+googleMapsHelper.prototype.MARKERS.BUS_VISTA_SUPERIOR_ROJO20X31 = {
+    icon: googleMapsHelper.prototype.MARKERS.BASESITE + "/busVistaSuperior20x31.png",
+    size: [20, 31],
+    scaledSize: [20, 31],
+    anchor: [0, 15.5]
+}
+googleMapsHelper.prototype.MARKERS.BUS_VISTA_SUPERIOR_ROJO40X61 = {
+    icon: googleMapsHelper.prototype.MARKERS.BASESITE + "/busVistaSuperior40x61.png",
+    size: [40, 61],
+    scaledSize: [40, 61],
+    anchor: [0, 30.5]
+}
